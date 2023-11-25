@@ -22,7 +22,14 @@ public class Tablero{
 			}
 		}
 	}
-	
+	public void quitarBomba(int fila, int columna) {
+		if(tablero[fila][columna] == 10) {
+			colocarCasilla(fila, columna, -2);
+			this.numBombas++;
+			this.casillasColocadas--;
+			this.casillasColocadas--; //AL COLOCAR CASILLA ANTES SE COLOCA 1 y SE IGUALAN SI SE RESTA UNA SOLA VEZ
+		}
+	}
 	public void colocarCasilla(int fila, int columna, int num) {
 		this.tablero[fila][columna] = num;
 		if(num == 10) { //PASAN UNA POSIBLE BOMBA
@@ -35,6 +42,9 @@ public class Tablero{
 			return true;
 		}
 		return false;
+	}
+	public int getNumero(int fila, int columna) {
+		return tablero[fila][columna];
 	}
 	public boolean ganado() {
 		return (casillasColocadas == tamano*tamano ||

@@ -81,12 +81,18 @@ public class BuscaminasJuego {
 				if(this.colocarCasillaCliente(fila, columna)) { 
 					return false; //ha encontrado una bomba en una de las casillas adyacentes
 				}
+				if(tablero[fila][columna] == 0) {
+					this.colocarTableroCliente(fila, columna, 0);
+				}
 			}else{
 				return false;
 			}
 		}
 		if(opcion == 2) {
 			colocarCasillaPosibleBomba(fila,columna);
+		}
+		if(opcion == 3) {
+			descolocarCasillaPosibleBomba(fila,columna);
 		}
 		return true;
 	}
@@ -111,6 +117,11 @@ public class BuscaminasJuego {
 	private void colocarCasillaPosibleBomba(int fila, int columna) {
 		if(!tableroCliente.casillaColocada(fila, columna)) {
 			tableroCliente.colocarCasilla(fila, columna, 10);
+		}
+	}
+	private void descolocarCasillaPosibleBomba(int fila, int columna) {
+		if(		tableroCliente.casillaColocada(fila, columna)) {
+			tableroCliente.quitarBomba(fila,columna);
 		}
 	}
 	

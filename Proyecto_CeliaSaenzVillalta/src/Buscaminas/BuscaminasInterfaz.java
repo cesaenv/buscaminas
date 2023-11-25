@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 
 public class BuscaminasInterfaz extends JFrame {
     private JButton[][] botones;
-    private int num = 30;
+    private int num = 4;
     
     public BuscaminasInterfaz() {
         super("Buscaminas");
@@ -14,17 +14,19 @@ public class BuscaminasInterfaz extends JFrame {
         // Inicializar tablero
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(10, 10));
+        setLayout(new GridLayout(4, 2));
         botones = new JButton[num][num];
 
         // Inicializar los botones del tablero
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                botones[i][j] = new JButton();
-                botones[i][j].setMargin(new Insets(0, 0, 0, 0));
-                add(botones[i][j]);
-                botones[i][j].addActionListener(new ActionListener() {
-                    @Override
+        for (int f = 0; f < num; f++) {
+            for (int c = 0; c < num; c++) {
+                botones[f][c] = new JButton();
+                botones[f][c].setMargin(new Insets(0, 0, 0, 0));
+                
+                add(botones[f][c]);
+                botones[f][c].addActionListener(new ActionListener() {
+                    int fila, columna;
+                	
                     public void actionPerformed(ActionEvent e) {
                         //aquí operacion lógica que se haría al pulsar
                     	//seguramente tenga que hacer una clase a parte
@@ -34,11 +36,11 @@ public class BuscaminasInterfaz extends JFrame {
                 });
             }
         }
-        
-
         setVisible(true);
     }
-
+    
+    
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

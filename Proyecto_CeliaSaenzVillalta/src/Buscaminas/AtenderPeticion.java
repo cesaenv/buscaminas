@@ -26,18 +26,6 @@ public class AtenderPeticion implements Runnable{
 	public void run() {
 		DataOutputStream dout = null;
 		DataInputStream din = null;
-		
-		String recibo ="";
-		String elegirOpcion = 	"Elegir opcion: "+ "\n"
-								+"	1. Despejar casilla"+ "\n"
-								+"	2. Posible bomba"+ "\n"
-								+"	3. Resolver" + "\n";
-		String pedirCasilla = "Introducir fila y columna: (separados por -, ejemplo 0-3)" + "\n";
-		String lineaBlanco = "\n";
-		String filaS = "", columnaS = "";
-		String [] casilla;
-		
-		int tamano, numero, fila, columna;
 		try {
 			dout = new DataOutputStream(cliente.getOutputStream()); 	//IOException
 			din = new DataInputStream(cliente.getInputStream());	//IOException
@@ -45,6 +33,17 @@ public class AtenderPeticion implements Runnable{
 			jugar(din, dout);	//IOException
 		}catch(IOException e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				if(din!= null) {
+					din.close();
+				}
+				if(dout != null) {
+					dout.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
