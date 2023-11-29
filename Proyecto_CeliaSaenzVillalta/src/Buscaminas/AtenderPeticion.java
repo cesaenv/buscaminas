@@ -26,13 +26,23 @@ public class AtenderPeticion implements Runnable{
 	public void run() {
 		DataOutputStream dout = null;
 		DataInputStream din = null;
+		
+		String modo = "";
 		try {
 			dout = new DataOutputStream(cliente.getOutputStream()); 	//IOException
 			din = new DataInputStream(cliente.getInputStream());	//IOException
-
-			jugar(din, dout);	//IOException
+				
+			modo = din.readLine();
+			System.out.println(modo);
+			if(modo.equalsIgnoreCase("TERMINAL")) {
+				jugarTerminal(din, dout);	//IOException
+			}
+			if(modo.equalsIgnoreCase("INTERFAZ")) {
+				jugarInterfaz(din,dout);	//IOException
+			}
+			
 		}catch(IOException e) {
-			e.printStackTrace();
+			
 		}finally {
 			try {
 				if(din!= null) {
@@ -46,8 +56,79 @@ public class AtenderPeticion implements Runnable{
 			}
 		}
 	}
+	private void jugarInterfaz(DataInputStream din, DataOutputStream dout) throws IOException{
+		String recibo = "",lineaBlanco = "\n";
+		String filaS,columnaS, modoS;
+		String [] casilla, modoArray;
+		
+		int fila, columna, modo;
+		int tamano;
+		boolean salir = false;
+		
+		//RECIBIR TAMAÑO DEL TABLERO
+		recibo = din.readLine();
+		System.out.println(recibo);
+		tamano = Integer.parseInt(recibo);
+		this.buscaminas = new BuscaminasJuego(tamano);
+		
+		
+		//RECIBIR PRIMERA CASILLA
+		recibo = din.readLine();
+		modoArray = recibo.split(" ");
+		casilla = modoArray[1].split("-");
+		filaS = casilla[0]; fila = Integer.parseInt(filaS);
+		columnaS = casilla[1]; columna = Integer.parseInt(columnaS);
+		this.buscaminas.iniciarTablero(fila, columna);
+		
+		System.out.println(this.buscaminas.mostrarTableroEntero());
+		
+		//MANDAR TABLERO
+		dout.writeBytes((tamano+2) + lineaBlanco);
+		dout.writeBytes(buscaminas.stringTablero());
+		dout.flush();
+		
+		while(!salir) {
+			//RECIBIR CASILLA
+			recibo = din.readLine();
+			
+			modoArray = recibo.split(" ");
+			modoS = modoArray[0];
+			modo = Integer.parseInt(modoS);
+			if(modo==4) { //modo 4: nuevoJuego
+				//NUEVO JUEGO				
+				System.out.println("NUEVO JUEGO");
+				this.jugarInterfaz(din,dout);
+				break;
+			}else {
+				System.out.println(recibo);
+				casilla = modoArray[1].split("-");
+				filaS = casilla[0]; fila = Integer.parseInt(filaS);
+				columnaS = casilla[1]; columna = Integer.parseInt(columnaS);
+				
+				if(!buscaminas.opcion(modo, fila, columna)) { //Si es false entonces ha encontrado una bomba
+					//SE HA PERDIDO
+					dout.writeBytes((-1) + lineaBlanco);
+					dout.writeBytes((tamano) + lineaBlanco);
+					dout.writeBytes(buscaminas.mostrarTableroEntero());
+					dout.flush();
+					
+					//NUEVO JUEGO				
+					System.out.println("NUEVO JUEGO, PERDISTE");
+					this.jugarInterfaz(din,dout);
+					break;
+				}
+				
+				//MANDAR TABLERO
+				dout.writeBytes((tamano+2) + lineaBlanco);
+				dout.writeBytes(buscaminas.stringTablero());
+				dout.flush();
+			}
+			
+		}
+		
+	}
 	
-	private void jugar(DataInputStream din, DataOutputStream dout) throws IOException {
+	private void jugarTerminal(DataInputStream din, DataOutputStream dout) throws IOException {
 		String recibo ="";
 		String elegirOpcion = 	"Elegir opcion: "+ "\n"
 								+"	1. Despejar casilla"+ "\n"
@@ -101,7 +182,8 @@ public class AtenderPeticion implements Runnable{
 				//NUEVO JUEGO
 				recibo = din.readLine();
 				if(!recibo.equalsIgnoreCase("N")) {
-					jugar(din,dout);
+					din.readLine();
+					jugarTerminal(din,dout);
 				}
 				break;
 			}
@@ -127,7 +209,9 @@ public class AtenderPeticion implements Runnable{
 				//NUEVO JUEGO
 				recibo = din.readLine();
 				if(!recibo.equalsIgnoreCase("N")) {
-					jugar(din,dout);
+					//LEE TERMINAL
+					din.readLine();
+					jugarTerminal(din,dout);
 				}
 				break;
 			}
@@ -144,7 +228,9 @@ public class AtenderPeticion implements Runnable{
 			//NUEVO JUEGO
 			recibo = din.readLine();
 			if(!recibo.equalsIgnoreCase("N")) {
-				jugar(din,dout);
+				//LEE TERMINAL
+				din.readLine();
+				jugarTerminal(din,dout);
 			}
 		}
 			

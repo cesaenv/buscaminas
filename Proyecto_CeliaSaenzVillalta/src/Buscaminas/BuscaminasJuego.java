@@ -13,9 +13,9 @@ public class BuscaminasJuego {
 	//CONSTRUCTORES
 	public BuscaminasJuego(int tamano){
 		this.tamano = tamano;
-		this.numBombas = (tamano*tamano)/4;
+		this.numBombas = (tamano*tamano)/5;
 		this.tablero = new int [tamano][tamano];
-		this.tableroCliente = new Tablero(tamano);
+		this.tableroCliente = new Tablero(tamano,numBombas);
 	}
 	
 	//MÉTODOS
@@ -31,50 +31,50 @@ public class BuscaminasJuego {
 		this.colocarTableroCliente(fila, columna, 0);
 		
 	}
-	public void jugar() {
-		Scanner sc = new Scanner(System.in);
-		String filaColumna, filaS, columnaS;
-		String [] filaColumnaSpliteado;
-		
-		int fila, columna, numero = 0;
-		
-		while(!ganado() && numero != 3) {
-			System.out.println(tableroCliente.mostrarTablero());
-			
-			System.out.println("Elegir opcion: ");
-			System.out.println("	1. Despejar casilla");
-			System.out.println("	2. Posible bomba");
-			System.out.println("	3. Resolver");
-
-			numero = Integer.parseInt(sc.nextLine());
-			
-			if(numero != 3) {
-				System.out.println("Introducir fila y columna: (separados por -, ejemplo 0-3)");
-				filaColumna = sc.nextLine();
-				filaColumnaSpliteado = filaColumna.split("-");
-				filaS = filaColumnaSpliteado[0];
-				columnaS = filaColumnaSpliteado[1];
-				
-				fila = Integer.parseInt(filaS);
-				columna = Integer.parseInt(columnaS);
-				
-				if(!opcion(numero,fila,columna)) {
-					break;
-				}else {
-					break;
-				}
-			}
-		}
-		if(ganado()) {
-			System.out.println("¡Enhorabuena!, has ganado");
-		}if(numero == 3) {
-			System.out.println(mostrarTableroEntero());
-		}else {
-			System.out.println(mostrarTableroEntero());
-			System.out.println("BOMBA, has perdido");
-		}
-			
-	}
+//	public void jugar() {
+//		Scanner sc = new Scanner(System.in);
+//		String filaColumna, filaS, columnaS;
+//		String [] filaColumnaSpliteado;
+//		
+//		int fila, columna, numero = 0;
+//		
+//		while(!ganado() && numero != 3) {
+//			System.out.println(tableroCliente.mostrarTablero());
+//			
+//			System.out.println("Elegir opcion: ");
+//			System.out.println("	1. Despejar casilla");
+//			System.out.println("	2. Posible bomba");
+//			System.out.println("	3. Resolver");
+//
+//			numero = Integer.parseInt(sc.nextLine());
+//			
+//			if(numero != 3) {
+//				System.out.println("Introducir fila y columna: (separados por -, ejemplo 0-3)");
+//				filaColumna = sc.nextLine();
+//				filaColumnaSpliteado = filaColumna.split("-");
+//				filaS = filaColumnaSpliteado[0];
+//				columnaS = filaColumnaSpliteado[1];
+//				
+//				fila = Integer.parseInt(filaS);
+//				columna = Integer.parseInt(columnaS);
+//				
+//				if(!opcion(numero,fila,columna)) {
+//					break;
+//				}else {
+//					break;
+//				}
+//			}
+//		}
+//		if(ganado()) {
+//			System.out.println("¡Enhorabuena!, has ganado");
+//		}if(numero == 3) {
+//			System.out.println(mostrarTableroEntero());
+//		}else {
+//			System.out.println(mostrarTableroEntero());
+//			System.out.println("BOMBA, has perdido");
+//		}
+//			
+//	}
 	public boolean opcion(int opcion, int fila, int columna) {
 		if(opcion == 1) {
 			if(!esBomba(fila,columna)) {
@@ -89,7 +89,13 @@ public class BuscaminasJuego {
 			}
 		}
 		if(opcion == 2) {
-			colocarCasillaPosibleBomba(fila,columna);
+			if(tableroCliente.casillaColocada(fila,columna)) {
+				if(!descolocarCasillaPosibleBomba(fila,columna)) {
+					opcion(1,fila,columna);
+				}
+			}else {
+				colocarCasillaPosibleBomba(fila,columna);
+			}
 		}
 		if(opcion == 3) {
 			descolocarCasillaPosibleBomba(fila,columna);
@@ -119,10 +125,14 @@ public class BuscaminasJuego {
 			tableroCliente.colocarCasilla(fila, columna, 10);
 		}
 	}
-	private void descolocarCasillaPosibleBomba(int fila, int columna) {
+	private boolean descolocarCasillaPosibleBomba(int fila, int columna) {
 		if(		tableroCliente.casillaColocada(fila, columna)) {
-			tableroCliente.quitarBomba(fila,columna);
+			if(!tableroCliente.quitarBomba(fila,columna)) {
+				return false;
+			}
+			return true;
 		}
+		return false;
 	}
 	
 	private void colocarBombas(int fila, int columna) {

@@ -49,7 +49,11 @@ public class ClienteTerminal {
 		String enviar = "";
 		
 		int tamanoTablero, tamanoLineas;
-			
+		
+		//ENVIAR QUE SE JUEGA EN TERMINAL
+		dout.writeBytes(("TERMINAL" + lineaBlanco));
+		dout.flush();
+		
 		//ENVIAR TAMAÑO TABLERO
 		while(!tamanoCorrecto(enviar = scanner.nextLine())) {
 			System.out.println("Tamaño erróneo");

@@ -7,9 +7,9 @@ public class Tablero{
 	private int casillasColocadas;
 	private int numBombas;
 	
-	public Tablero(int tamano){
+	public Tablero(int tamano, int numBombas){
 		this.casillasColocadas = 0;
-		this.numBombas = (tamano*tamano)/4;
+		this.numBombas = numBombas;
 		
 		this.tamano = tamano;
 		this.tablero = new int [tamano][tamano];
@@ -22,13 +22,15 @@ public class Tablero{
 			}
 		}
 	}
-	public void quitarBomba(int fila, int columna) {
+	public boolean quitarBomba(int fila, int columna) {
 		if(tablero[fila][columna] == 10) {
 			colocarCasilla(fila, columna, -2);
 			this.numBombas++;
 			this.casillasColocadas--;
 			this.casillasColocadas--; //AL COLOCAR CASILLA ANTES SE COLOCA 1 y SE IGUALAN SI SE RESTA UNA SOLA VEZ
+			return true;
 		}
+		return false;
 	}
 	public void colocarCasilla(int fila, int columna, int num) {
 		this.tablero[fila][columna] = num;
