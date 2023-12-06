@@ -8,23 +8,32 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClienteInterfaz extends JFrame {
 	static ClienteInterfaz cliente;
 //PANEL JUEGO
 	private JPanel panelJuego;
 	private JButton[][] botones;
-//PANEL BOTONES_SUPERIORES	
-	private JPanel panelBotonesSuperior;
+
+//PANEL SUPERIORES
+	private JPanel panelSuperior;
 	private JButton nuevoJuegoButton;
     private JButton despejarCasillaButton;
     private JButton colocarBanderasButton;
-	
-    private static DataOutputStream dout;
+
+	private Label labelNumBombas;
+	private Label labelNumCasillasColocadas;
+	private JLabel labelReloj;
+
+//FUNCIONALIDAD SOCKET
+	private static DataOutputStream dout;
     private static DataInputStream din;
     
-    
+    private Date inicio;
     private int numModo;
     private static int num;
     
@@ -73,7 +82,7 @@ public class ClienteInterfaz extends JFrame {
 				dout.writeBytes(num + lineaBlanco);
 				dout.flush();
 
-
+				this.inicio = new Date();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -82,6 +91,7 @@ public class ClienteInterfaz extends JFrame {
     
     public ClienteInterfaz() {
     	this.numModo = 1;
+		this.inicio = new Date();
 
     	// Configurar la ventana principal
         setTitle("Buscaminas");
@@ -120,44 +130,75 @@ public class ClienteInterfaz extends JFrame {
 		colocarBanderasButton.addActionListener(new BotonModo(2));
 		colocarBanderasButton.setBackground(Color.white);
 
-		panelBotonesSuperior = new JPanel();
-		panelBotonesSuperior.add(nuevoJuegoButton);
-		panelBotonesSuperior.add(despejarCasillaButton);
-		panelBotonesSuperior.add(colocarBanderasButton);
+		// Crear label adicionales
+		labelNumBombas = new Label();
+		labelNumCasillasColocadas = new Label();
+
+		labelReloj = new JLabel();
+		labelReloj.setHorizontalAlignment(JLabel.CENTER);
+		labelReloj.setFont(labelReloj.getFont().deriveFont(24.0f));
+		labelReloj.setText("0.0");
+
+		// PANEL SUPERIOR
+		panelSuperior = new JPanel();
+		panelSuperior.add(labelReloj);
+
+		panelSuperior.add(nuevoJuegoButton);
+		panelSuperior.add(despejarCasillaButton);
+		panelSuperior.add(colocarBanderasButton);
+
+		panelSuperior.add(labelNumBombas);
+		panelSuperior.add(labelNumCasillasColocadas);
+
 
 		// Agregar panel de botones al norte (superior)
-		add(panelBotonesSuperior, BorderLayout.NORTH);
+		add(panelSuperior, BorderLayout.NORTH);
 
         // Configurar la ventana
         pack();
         setLocationRelativeTo(null); // Centrar la ventana en la pantalla
         
-     // Configurar la ventana para que aparezca en pantalla completa
+     	// Configurar la ventana para que aparezca en pantalla completa
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
     }
+	private void actualizarReloj() {
+		// Obtener la hora actual
+		Date ahora = new Date();
+		Date act = new Date(ahora.getTime()-inicio.getTime());
+
+		// Formatear la hora como cadena
+		SimpleDateFormat formato = new SimpleDateFormat("mm:ss.SSS");
+		String horaFormateada = formato.format(act);
+
+		// Actualizar el texto del JLabel
+		labelReloj.setText(horaFormateada);
+	}
+
 	private void generarPanelJuego(){
 		remove(panelJuego);
 
 		// Crear el panel de juego
 		panelJuego = new JPanel(new GridLayout(num, num));
 		botones = new JButton[num][num];
-		for (int i = 0; i < num; i++) {
-			for (int j = 0; j < num; j++) {
-				botones[i][j] = new JButton();
-				botones[i][j].setBackground(Color.pink);
+		for (int f = 0; f < num; f++) {
+			for (int c = 0; c < num; c++) {
+				botones[f][c] = new JButton();
+				botones[f][c].setBackground(Color.pink);
 				Font fuente = new Font("Calibri",20,50);
-				botones[i][j].setFont(fuente);
-				botones[i][j].setForeground(Color.BLACK);
-				botones[i][j].addActionListener(new BotonCasilla(i,j));
+				botones[f][c].setFont(fuente);
+				botones[f][c].setForeground(Color.BLACK);
+				botones[f][c].addActionListener(new BotonCasilla(f,c));
 
-				panelJuego.add(botones[i][j]);
+				panelJuego.add(botones[f][c]);
 			}
 		}
 
 		// Agregar componentes a la ventana
 		add(panelJuego, BorderLayout.CENTER);
 
+		labelNumBombas.setText("");
+		labelNumCasillasColocadas.setText("");
 	}
     public void jugar() throws IOException{
 		setVisible(true);
@@ -172,8 +213,10 @@ public class ClienteInterfaz extends JFrame {
     	dout.writeBytes(num + lineaBlanco);
     	dout.flush();
 
-    	while(!Thread.currentThread().isInterrupted()) {
 
+
+    	while(!Thread.currentThread().isInterrupted()) {
+			actualizarReloj();
     	}
 
     }
@@ -201,7 +244,6 @@ public class ClienteInterfaz extends JFrame {
 		}
     	for(int f=0; f<num ; f++){
     		linea = din.readLine();
-			System.out.println(linea);
     		lineaSpliteada = linea.split(" ");
 			for(int c=0; c<lineaSpliteada.length; c++) {
 				if(lineaSpliteada[c].equals("P")){
@@ -224,8 +266,9 @@ public class ClienteInterfaz extends JFrame {
 			}
     	}
 		if(!ganado && !perdido){
-			System.out.println(din.readLine());
-			System.out.println(din.readLine());
+			labelNumBombas.setText(din.readLine());
+			labelNumCasillasColocadas.setText(din.readLine());
+
 		}else{
 			String mensaje = "HAS PERDIDO";
 			if(ganado){

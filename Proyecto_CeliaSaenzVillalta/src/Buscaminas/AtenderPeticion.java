@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Objects;
 
 public class AtenderPeticion implements Runnable{
 	//ATRIBUTOS
@@ -69,16 +70,18 @@ public class AtenderPeticion implements Runnable{
 		recibo = din.readLine();
 		tamano = Integer.parseInt(recibo);
 		this.buscaminas = new BuscaminasJuego(tamano);
-		System.out.println("Primera linea antes de perder, debe de ser tam de tablero" + recibo);
+		System.out.println("Primera linea antes de perder, debe de ser tam de tablero: " + recibo);
 		
 		//RECIBIR PRIMERA CASILLA
 		recibo = din.readLine();
+		System.out.println("Primera linea antes de perder, debe de ser primera casilla: " + recibo);
+
+
 		modoArray = recibo.split(" ");
 		casilla = modoArray[1].split("-");
 		filaS = casilla[0]; fila = Integer.parseInt(filaS);
 		columnaS = casilla[1]; columna = Integer.parseInt(columnaS);
 		this.buscaminas.iniciarTablero(fila, columna);
-		System.out.println("Primera linea antes de perder, debe de ser primera casilla" + recibo);
 
 
 		//MANDAR TABLERO

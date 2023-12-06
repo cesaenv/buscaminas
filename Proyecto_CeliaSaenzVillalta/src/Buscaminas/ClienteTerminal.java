@@ -53,10 +53,11 @@ public class ClienteTerminal {
 		//ENVIAR QUE SE JUEGA EN TERMINAL
 		dout.writeBytes(("TERMINAL" + lineaBlanco));
 		dout.flush();
-		
+
+		System.out.println("Introducir tamaño del tablero: ");
 		//ENVIAR TAMAÑO TABLERO
 		while(!tamanoCorrecto(enviar = scanner.nextLine())) {
-			System.out.println("Tamaño erróneo");
+			System.out.println("Tamaño erróneo, vuelve a introducir");
 		}
 		tamanoTablero = Integer.parseInt(enviar);
 		dout.writeBytes((tamanoTablero + lineaBlanco));
@@ -69,8 +70,8 @@ public class ClienteTerminal {
 		}
 		
 		//ENVIAR PRIMERA CASILLA
-		while(!casillaCorrecta(casilla = scanner.nextLine())) {
-			System.out.println("Casilla errónea");
+		while(!casillaCorrecta(casilla = scanner.nextLine(), tamanoTablero)){
+			System.out.println("Casilla errónea, vuelva a introducir");
 		}
 		dout.writeBytes((casilla + lineaBlanco));
 		dout.flush();
@@ -83,8 +84,8 @@ public class ClienteTerminal {
 		
 		while(true) {
 			//ENVIAR OPCION
-			while(!tamanoCorrecto(opcion = scanner.nextLine())) {
-				System.out.println("Opción errónea");
+			while(!tamanoCorrecto(opcion = scanner.nextLine()) || Integer.parseInt(opcion)>4 || Integer.parseInt(opcion)<1) {
+				System.out.println("Opción errónea, vuelva a introducir");
 			}
 			dout.writeBytes(opcion + lineaBlanco);
 			dout.flush();
@@ -110,8 +111,8 @@ public class ClienteTerminal {
 			System.out.println(din.readLine());
 			
 			//ENVIAR CASILLA
-			while(!casillaCorrecta(casilla = scanner.nextLine())) {
-				System.out.println("Casilla errónea");
+			while(!casillaCorrecta(casilla = scanner.nextLine(),tamanoTablero)){
+				System.out.println("Casilla errónea, vuelva a introducir");
 			}
 			dout.writeBytes(casilla + lineaBlanco);
 			dout.flush();
@@ -143,18 +144,25 @@ public class ClienteTerminal {
 	private static boolean tamanoCorrecto(String s) {
 		boolean dev = true;
 		try {
-			Integer.parseInt(s);
+			int n = Integer.parseInt(s);
+			if (n<5){
+				System.out.println("No se acepta un tablero tan pequeño");
+			}
 		}catch(NumberFormatException e) {
 			dev = false;
 		}finally {
 			return dev;
 		}
 	}
-	private static boolean casillaCorrecta(String s) {
+	private static boolean casillaCorrecta(String s, int tamanoTablero) {
 		String [] casilla = s.split("-");
 		if(casilla.length == 2) {
-			return (tamanoCorrecto(casilla[0]) && 
-					tamanoCorrecto(casilla[1]) );
+			if(tamanoCorrecto(casilla[0]) && tamanoCorrecto(casilla[1])){
+				int fila = Integer.parseInt(casilla[0]);
+				int columna = Integer.parseInt(casilla[1]);
+				return (fila >= 0 && fila<tamanoTablero &&
+						columna >= 0 && columna<tamanoTablero);
+			}
 		}
 		return false;
 	}
