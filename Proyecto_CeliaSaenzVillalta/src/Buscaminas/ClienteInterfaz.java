@@ -11,7 +11,8 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ClienteInterfaz extends JFrame {
-//PANEL JUEGO	
+	static ClienteInterfaz cliente;
+//PANEL JUEGO
 	private JPanel panelJuego;
 	private JButton[][] botones;
 //PANEL BOTONES_SUPERIORES	
@@ -26,11 +27,6 @@ public class ClienteInterfaz extends JFrame {
     
     private int numModo;
     private static int num;
-	
-//    public static void main(String[] args) {
-//    	ClienteInterfaz nuevoCliente = new ClienteInterfaz(null);
-//    	
-//    }
     
 	public static void main(String[] args) {
 		Socket servidor = null;
@@ -40,9 +36,8 @@ public class ClienteInterfaz extends JFrame {
 			din = new DataInputStream(servidor.getInputStream());	//IOException
 			dout = new DataOutputStream(servidor.getOutputStream());	//IOException
 
-
 			if(seleccionarNivel()){
-				ClienteInterfaz cliente = new ClienteInterfaz();
+				cliente = new ClienteInterfaz();
 				cliente.jugar();	//IOException
 			}
 
@@ -50,9 +45,6 @@ public class ClienteInterfaz extends JFrame {
 			e.printStackTrace();
 		}finally {
 			try {
-				if(servidor != null) {
-					servidor.close();
-				}
 				if(din != null) {
 					din.close();
 				}
@@ -64,56 +56,77 @@ public class ClienteInterfaz extends JFrame {
 			}
 		}
     }
+	private void nuevoJuego(){
+		setVisible(false);
+		if(seleccionarNivel()){
+			generarPanelJuego();
+			try {
+				setVisible(true);
+
+				String lineaBlanco = "\n";
+
+				//ENVIAR MODO
+				dout.writeBytes(4 + lineaBlanco);
+				dout.flush();
+
+				//ENVIAR TAMAÑO TABLERO
+				dout.writeBytes(num + lineaBlanco);
+				dout.flush();
+
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
     
     public ClienteInterfaz() {
     	this.numModo = 1;
-    	
+
     	// Configurar la ventana principal
         setTitle("Buscaminas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-     
-        
-        // Crear el panel de juego
-        panelJuego = new JPanel(new GridLayout(num, num));
-        botones = new JButton[num][num];
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                botones[i][j] = new JButton();
-                botones[i][j].setBackground(Color.pink);
-                Font fuente = new Font("Calibri",20,50);
-                botones[i][j].setFont(fuente);
-                botones[i][j].setForeground(Color.BLACK);
-                botones[i][j].addActionListener(new BotonCasilla(i,j));
-                
-                panelJuego.add(botones[i][j]);
-            }
-        }
 
-        // Crear botones adicionales
-        nuevoJuegoButton = new JButton("Nuevo Juego");
-        nuevoJuegoButton.addActionListener(new BotonModo(4));
-        nuevoJuegoButton.setBackground(Color.white);
+		// Crear el panel de juego
+		panelJuego = new JPanel(new GridLayout(num, num));
+		botones = new JButton[num][num];
+		for (int i = 0; i < num; i++) {
+			for (int j = 0; j < num; j++) {
+				botones[i][j] = new JButton();
+				botones[i][j].setBackground(Color.pink);
+				Font fuente = new Font("Calibri",20,50);
+				botones[i][j].setFont(fuente);
+				botones[i][j].setForeground(Color.BLACK);
+				botones[i][j].addActionListener(new BotonCasilla(i,j));
 
-        despejarCasillaButton = new JButton("DespejarCasilla");
-        despejarCasillaButton.addActionListener(new BotonModo(1));
-        despejarCasillaButton.setBackground(Color.magenta);
+				panelJuego.add(botones[i][j]);
+			}
+		}
 
-        colocarBanderasButton = new JButton("Colocar Banderas");
-        colocarBanderasButton.addActionListener(new BotonModo(2));
-        colocarBanderasButton.setBackground(Color.white);
-        
-        panelBotonesSuperior = new JPanel();
-        panelBotonesSuperior.add(nuevoJuegoButton);
-        panelBotonesSuperior.add(despejarCasillaButton);
-        panelBotonesSuperior.add(colocarBanderasButton);
+		// Agregar componentes a la ventana
+		add(panelJuego, BorderLayout.CENTER);
 
-        // Agregar panel de botones al norte (superior)
-        add(panelBotonesSuperior, BorderLayout.NORTH);
-        
-        // Agregar componentes a la ventana
-        add(panelJuego, BorderLayout.CENTER);
-       
+		// Crear botones adicionales
+		nuevoJuegoButton = new JButton("Nuevo Juego");
+		nuevoJuegoButton.addActionListener(new BotonModo(4));
+		nuevoJuegoButton.setBackground(Color.white);
+
+		despejarCasillaButton = new JButton("DespejarCasilla");
+		despejarCasillaButton.addActionListener(new BotonModo(1));
+		despejarCasillaButton.setBackground(Color.magenta);
+
+		colocarBanderasButton = new JButton("Colocar Banderas");
+		colocarBanderasButton.addActionListener(new BotonModo(2));
+		colocarBanderasButton.setBackground(Color.white);
+
+		panelBotonesSuperior = new JPanel();
+		panelBotonesSuperior.add(nuevoJuegoButton);
+		panelBotonesSuperior.add(despejarCasillaButton);
+		panelBotonesSuperior.add(colocarBanderasButton);
+
+		// Agregar panel de botones al norte (superior)
+		add(panelBotonesSuperior, BorderLayout.NORTH);
 
         // Configurar la ventana
         pack();
@@ -121,15 +134,35 @@ public class ClienteInterfaz extends JFrame {
         
      // Configurar la ventana para que aparezca en pantalla completa
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        
-        
-        setVisible(true);
+
     }
+	private void generarPanelJuego(){
+		remove(panelJuego);
+
+		// Crear el panel de juego
+		panelJuego = new JPanel(new GridLayout(num, num));
+		botones = new JButton[num][num];
+		for (int i = 0; i < num; i++) {
+			for (int j = 0; j < num; j++) {
+				botones[i][j] = new JButton();
+				botones[i][j].setBackground(Color.pink);
+				Font fuente = new Font("Calibri",20,50);
+				botones[i][j].setFont(fuente);
+				botones[i][j].setForeground(Color.BLACK);
+				botones[i][j].addActionListener(new BotonCasilla(i,j));
+
+				panelJuego.add(botones[i][j]);
+			}
+		}
+
+		// Agregar componentes a la ventana
+		add(panelJuego, BorderLayout.CENTER);
+
+	}
     public void jugar() throws IOException{
+		setVisible(true);
+
     	String lineaBlanco = "\n";
-    	
-    	setVisible(true);
-    	setVisible(true);
     	
     	//ENVIAR MODO DE JUEGO
     	dout.writeBytes(("INTERFAZ" + lineaBlanco));
@@ -139,9 +172,8 @@ public class ClienteInterfaz extends JFrame {
     	dout.writeBytes(num + lineaBlanco);
     	dout.flush();
 
+    	while(!Thread.currentThread().isInterrupted()) {
 
-    	while(true) {
-    		
     	}
 
     }
@@ -191,37 +223,34 @@ public class ClienteInterfaz extends JFrame {
 				}
 			}
     	}
-    	if(perdido) {
-    		System.out.println("Se ha perdido");
-
-
-    		//ENVIAR TAMAÑO TABLERO
-			dout.writeBytes(num + "\n");
-			dout.flush();
-			System.out.println("hola");
-    	}
-		if(ganado){
-			seleccionarNivel();
-
-			//ENVIAR TAMAÑO TABLERO
-			dout.writeBytes(num + "\n");
-			dout.flush();
-		}
 		if(!ganado && !perdido){
 			System.out.println(din.readLine());
 			System.out.println(din.readLine());
+		}else{
+			String mensaje = "HAS PERDIDO";
+			if(ganado){
+				System.out.println(din.readLine());
+				System.out.println(din.readLine());
+				mensaje = "HAS GANADO";
+			}
+			JOptionPane.showMessageDialog(null, mensaje);
+			nuevoJuego();
 		}
     }
     
-    private void despejarCasillas() {
+    private void mostrarCasillas() {
+		String linea = "";
     	for (int f = 0; f < num; f++) {
             for (int c = 0; c < num; c++) {
                 botones[f][c].setText("");
-                botones[f][c].setIcon(null);
 				botones[f][c].setBackground(Color.PINK);
+				linea = linea + c + " ";
             }
+			System.out.println(linea);
+			linea = "";
         }
     }
+
 	private static boolean seleccionarNivel() {
 
 		// Array de opciones
@@ -236,7 +265,8 @@ public class ClienteInterfaz extends JFrame {
 				JOptionPane.QUESTION_MESSAGE,
 				null,
 				opciones,
-				opciones[0]);
+				opciones[0]
+		);
 
 		// Procesar la opción seleccionada
 		if (seleccion >= 0) {
@@ -250,8 +280,9 @@ public class ClienteInterfaz extends JFrame {
 			if (nivelSeleccionado.equalsIgnoreCase("Nivel Avanzado")) {
 				num = 20;
 			}
-		}else {
-			JOptionPane.showMessageDialog(null, "Operación cancelada");
+		} else {
+			JOptionPane.showMessageDialog(null, "HASTA PRONTO!");
+			Thread.currentThread().interrupt();
 		}
 		return (seleccion >= 0);
 	}
@@ -298,24 +329,17 @@ public class ClienteInterfaz extends JFrame {
     		}
     		else if(modo == 4) {	//NUEVO JUEGO
     			nuevoJuegoButton.setBackground(Color.magenta);
-    			
-    			try {
-    				System.out.println("SE HA PULSADO NUEVO JUEGO-CLIENTE");
-					//ENVIAR MODO DE JUEGO
-					dout.writeBytes(modo + " 0-0 " + "\n");
-	    			dout.flush();
-	    			
-	    			despejarCasillas();
-	    			
-	    			//ENVIAR TAMAÑO TABLERO
-	    			dout.writeBytes(num + "\n");
-	    			dout.flush();
-				} catch (IOException e1) {
-					
-				}
-    			
-    			colocarBanderasButton.setBackground(Color.white);
-    			despejarCasillaButton.setBackground(Color.white);
+
+				colocarBanderasButton.setBackground(Color.white);
+				despejarCasillaButton.setBackground(Color.white);
+
+				nuevoJuego();
+
+				numModo = modo;
+				despejarCasillaButton.setBackground(Color.magenta);
+
+				nuevoJuegoButton.setBackground(Color.white);
+				colocarBanderasButton.setBackground(Color.white);
     		}
     	}
     }

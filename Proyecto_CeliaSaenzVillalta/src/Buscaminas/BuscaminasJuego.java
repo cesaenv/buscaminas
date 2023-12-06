@@ -7,6 +7,7 @@ public class BuscaminasJuego {
 	//ATRIBUTOS
 	private int [][] tablero;
 	private int numBombas;
+	private int numBombasCorrectas;
 	private int tamano;
 	private Tablero tableroCliente;
 	
@@ -16,6 +17,7 @@ public class BuscaminasJuego {
 		this.numBombas = (tamano*tamano)/6;
 		this.tablero = new int [tamano][tamano];
 		this.tableroCliente = new Tablero(tamano,numBombas);
+		this.numBombasCorrectas = 0;
 	}
 	
 	//MÉTODOS
@@ -95,6 +97,9 @@ public class BuscaminasJuego {
 				}
 			}else {
 				colocarCasillaPosibleBomba(fila,columna);
+				if(esBomba(fila,columna)){
+					numBombasCorrectas++;
+				}
 			}
 		}
 		if(opcion == 3) {
@@ -103,7 +108,7 @@ public class BuscaminasJuego {
 		return true;
 	}
 	public boolean ganado() {
-		return tableroCliente.ganado();
+		return tableroCliente.ganado() && numBombasCorrectas == numBombas;
 	}
 	public boolean esBomba(int fila, int columna) {
 		return (tablero[fila][columna] == -1);

@@ -34,7 +34,6 @@ public class AtenderPeticion implements Runnable{
 			din = new DataInputStream(cliente.getInputStream());	//IOException
 				
 			modo = din.readLine();
-			System.out.println(modo);
 			if(modo.equalsIgnoreCase("TERMINAL")) {
 				jugarTerminal(din, dout);	//IOException
 			}
@@ -43,7 +42,7 @@ public class AtenderPeticion implements Runnable{
 			}
 			
 		}catch(IOException e) {
-			
+			e.printStackTrace();
 		}finally {
 			try {
 				if(din!= null) {
@@ -68,10 +67,9 @@ public class AtenderPeticion implements Runnable{
 		
 		//RECIBIR TAMAÑO DEL TABLERO
 		recibo = din.readLine();
-		System.out.println(recibo);
 		tamano = Integer.parseInt(recibo);
 		this.buscaminas = new BuscaminasJuego(tamano);
-		
+		System.out.println("Primera linea antes de perder, debe de ser tam de tablero" + recibo);
 		
 		//RECIBIR PRIMERA CASILLA
 		recibo = din.readLine();
@@ -80,9 +78,9 @@ public class AtenderPeticion implements Runnable{
 		filaS = casilla[0]; fila = Integer.parseInt(filaS);
 		columnaS = casilla[1]; columna = Integer.parseInt(columnaS);
 		this.buscaminas.iniciarTablero(fila, columna);
-		
-		System.out.println(this.buscaminas.mostrarTableroEntero());
-		
+		System.out.println("Primera linea antes de perder, debe de ser primera casilla" + recibo);
+
+
 		//MANDAR TABLERO
 		dout.writeBytes((tamano+2) + lineaBlanco);
 		dout.writeBytes(buscaminas.stringTablero());
@@ -97,11 +95,9 @@ public class AtenderPeticion implements Runnable{
 			modo = Integer.parseInt(modoS);
 			if(modo==4) { //modo 4: nuevoJuego
 				//NUEVO JUEGO				
-				System.out.println("NUEVO JUEGO");
 				this.jugarInterfaz(din,dout);
 				break;
 			}else {
-				System.out.println(recibo);
 				casilla = modoArray[1].split("-");
 				filaS = casilla[0]; fila = Integer.parseInt(filaS);
 				columnaS = casilla[1]; columna = Integer.parseInt(columnaS);
@@ -112,9 +108,12 @@ public class AtenderPeticion implements Runnable{
 					dout.writeBytes((tamano) + lineaBlanco);
 					dout.writeBytes(buscaminas.mostrarTableroEntero());
 					dout.flush();
-					
-					//NUEVO JUEGO				
-					System.out.println("NUEVO JUEGO, PERDISTE");
+
+					//LEER MODO JUEGO
+					modoS = din.readLine();
+					System.out.println(modoS);
+
+					//NUEVO JUEGO
 					this.jugarInterfaz(din,dout);
 					break;
 				}
@@ -128,10 +127,11 @@ public class AtenderPeticion implements Runnable{
 					dout.writeBytes(buscaminas.stringTablero());
 					dout.flush();
 
-
+					//LEER MODO JUEGO
+					modoS = din.readLine();
+					System.out.println(modoS);
 
 					//NUEVO JUEGO
-					System.out.println("NUEVO JUEGO, GANASTE");
 					this.jugarInterfaz(din,dout);
 					break;
 				}else{
@@ -234,7 +234,6 @@ public class AtenderPeticion implements Runnable{
 				break;
 			}
 		}
-		System.out.println("GANASTE");
 		if(buscaminas.ganado()) {
 			//GANADO
 			dout.writeBytes((-2) + lineaBlanco);
