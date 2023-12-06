@@ -25,8 +25,7 @@ public class ClienteInterfaz extends JFrame {
     
     
     private int numModo;
-    private boolean nuevoJuego;
-    private int num = 10;
+    private static int num;
 	
 //    public static void main(String[] args) {
 //    	ClienteInterfaz nuevoCliente = new ClienteInterfaz(null);
@@ -40,9 +39,13 @@ public class ClienteInterfaz extends JFrame {
 			servidor= new Socket(InetAddress.getLocalHost().getHostAddress(), 6666);	//IOException
 			din = new DataInputStream(servidor.getInputStream());	//IOException
 			dout = new DataOutputStream(servidor.getOutputStream());	//IOException
-			
-			ClienteInterfaz cliente = new ClienteInterfaz();
-			cliente.jugar();	//IOException
+
+
+			if(seleccionarNivel()){
+				ClienteInterfaz cliente = new ClienteInterfaz();
+				cliente.jugar();	//IOException
+			}
+
 		}catch(IOException e) {
 			e.printStackTrace();
 		}finally {
@@ -128,19 +131,19 @@ public class ClienteInterfaz extends JFrame {
     	setVisible(true);
     	setVisible(true);
     	
-    	//ENVIAR QUE SE JUEGA EN INTERFAZ
+    	//ENVIAR MODO DE JUEGO
     	dout.writeBytes(("INTERFAZ" + lineaBlanco));
     	dout.flush();
     	
     	//ENVIAR TAMAÑO TABLERO
     	dout.writeBytes(num + lineaBlanco);
     	dout.flush();
-    	
-    	nuevoJuego = false;
-    	while(!nuevoJuego) {
+
+
+    	while(true) {
     		
     	}
-    	System.out.println("salidoBucle");
+
     }
     
     private void modificarCasillas() throws IOException {
@@ -148,33 +151,41 @@ public class ClienteInterfaz extends JFrame {
     	String [] lineaSpliteada;
     	
     	boolean perdido = false;
+		boolean ganado = false;
     	
     	int numLineas;
     	
     	linea = din.readLine();
     	numLineas = Integer.parseInt(linea);
-    	System.out.println(numLineas);
     	if(numLineas == -1) { //HAS PERDIDO
         	linea = din.readLine();
     		numLineas = Integer.parseInt(linea);
     		perdido = true;
     	}
-    	System.out.println(numLineas);
+		if(numLineas == -2) { //HAS GANADO
+			linea = din.readLine();
+			numLineas = Integer.parseInt(linea);
+			ganado = true;
+		}
     	for(int f=0; f<num ; f++){
     		linea = din.readLine();
-    		System.out.println(linea);
+			System.out.println(linea);
     		lineaSpliteada = linea.split(" ");
 			for(int c=0; c<lineaSpliteada.length; c++) {
 				if(lineaSpliteada[c].equals("P")){
 					botones[f][c].setText("");
-					botones[f][c].setIcon(new ImageIcon("flag.png"));
+					botones[f][c].setBackground(Color.gray);
+					//botones[f][c].setIcon(new ImageIcon("Imegenes\\flag.png"));
 				}else if(lineaSpliteada[c].equals("B")) {
 					botones[f][c].setText("");
-					botones[f][c].setIcon(new ImageIcon("bomba.png"));
+					botones[f][c].setBackground(Color.red);
+					//botones[f][c].setIcon(new ImageIcon("Imagenes\\bomba.png"));
 				}else if(lineaSpliteada[c].equals("0")) {
 					botones[f][c].setText("");
 					botones[f][c].setIcon(null);
 				}else {
+					botones[f][c].setBackground(Color.pink);
+					botones[f][c].setText(lineaSpliteada[c]);
 					botones[f][c].setText(lineaSpliteada[c]);
 					botones[f][c].setIcon(null);
 				}
@@ -182,25 +193,68 @@ public class ClienteInterfaz extends JFrame {
     	}
     	if(perdido) {
     		System.out.println("Se ha perdido");
+
+
     		//ENVIAR TAMAÑO TABLERO
 			dout.writeBytes(num + "\n");
 			dout.flush();
-    	}else {
-    		System.out.println(din.readLine());
-        	System.out.println(din.readLine());
+			System.out.println("hola");
     	}
+		if(ganado){
+			seleccionarNivel();
+
+			//ENVIAR TAMAÑO TABLERO
+			dout.writeBytes(num + "\n");
+			dout.flush();
+		}
+		if(!ganado && !perdido){
+			System.out.println(din.readLine());
+			System.out.println(din.readLine());
+		}
     }
     
     private void despejarCasillas() {
-    	for (int i = 0; i < num; i++) {
-            for (int j = 0; j < num; j++) {
-                botones[i][j].setText("");
-                botones[i][j].setIcon(null);
+    	for (int f = 0; f < num; f++) {
+            for (int c = 0; c < num; c++) {
+                botones[f][c].setText("");
+                botones[f][c].setIcon(null);
+				botones[f][c].setBackground(Color.PINK);
             }
         }
     }
-    
-    
+	private static boolean seleccionarNivel() {
+
+		// Array de opciones
+		String[] opciones = {"Nivel Principiante", "Nivel Intermedio", "Nivel Avanzado"};
+
+		// Mostrar el cuadro de diálogo de elección
+		int seleccion = JOptionPane.showOptionDialog(
+				null,
+				"Selecciona un nivel:",
+				"Seleccionar Nivel",
+				JOptionPane.DEFAULT_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				null,
+				opciones,
+				opciones[0]);
+
+		// Procesar la opción seleccionada
+		if (seleccion >= 0) {
+			String nivelSeleccionado = opciones[seleccion];
+			if (nivelSeleccionado.equalsIgnoreCase("Nivel Principiante")) {
+				num = 8;
+			}
+			if (nivelSeleccionado.equalsIgnoreCase("Nivel Intermedio")) {
+				num = 12;
+			}
+			if (nivelSeleccionado.equalsIgnoreCase("Nivel Avanzado")) {
+				num = 20;
+			}
+		}else {
+			JOptionPane.showMessageDialog(null, "Operación cancelada");
+		}
+		return (seleccion >= 0);
+	}
     
     class BotonCasilla implements ActionListener{
     	private int fila, columna;
@@ -247,6 +301,7 @@ public class ClienteInterfaz extends JFrame {
     			
     			try {
     				System.out.println("SE HA PULSADO NUEVO JUEGO-CLIENTE");
+					//ENVIAR MODO DE JUEGO
 					dout.writeBytes(modo + " 0-0 " + "\n");
 	    			dout.flush();
 	    			

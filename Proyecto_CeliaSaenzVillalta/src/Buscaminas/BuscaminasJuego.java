@@ -13,7 +13,7 @@ public class BuscaminasJuego {
 	//CONSTRUCTORES
 	public BuscaminasJuego(int tamano){
 		this.tamano = tamano;
-		this.numBombas = (tamano*tamano)/5;
+		this.numBombas = (tamano*tamano)/6;
 		this.tablero = new int [tamano][tamano];
 		this.tableroCliente = new Tablero(tamano,numBombas);
 	}
@@ -90,7 +90,7 @@ public class BuscaminasJuego {
 		}
 		if(opcion == 2) {
 			if(tableroCliente.casillaColocada(fila,columna)) {
-				if(!descolocarCasillaPosibleBomba(fila,columna)) {
+				if(!tableroCliente.quitarFlag(fila,columna)) {
 					opcion(1,fila,columna);
 				}
 			}else {

@@ -35,9 +35,6 @@ public class Tablero{
 	{
 		if(tablero[fila][columna] == 10) {
 			colocarCasilla(fila, columna, -2);
-			this.numBombas++;
-			this.casillasColocadas--;
-			this.casillasColocadas--; //AL COLOCAR CASILLA ANTES SE COLOCA 1 y SE IGUALAN SI SE RESTA UNA SOLA VEZ
 			return true;
 		}
 		return false;
@@ -52,10 +49,16 @@ public class Tablero{
 	{
 		if(!casillaColocada(fila,columna)) {
 			this.tablero[fila][columna] = num;
-			if(num == 10) { //PASAN UNA POSIBLE BOMBA
+			this.casillasColocadas++;
+			if(num == 10){	//PASAN UNA POSIBLE BOMBA PARA COLOCAR
 				this.numBombas--;
 			}
-			this.casillasColocadas++;
+		}else{
+			if(tablero[fila][columna] == 10){	//PASAN UNA POSIBLE BOMBA PARA DESCOLOCAR
+				this.tablero[fila][columna] = num;
+				this.numBombas++;
+				this.casillasColocadas--;
+			}
 		}
 	}
 	public boolean casillaColocada(int fila, int columna) 

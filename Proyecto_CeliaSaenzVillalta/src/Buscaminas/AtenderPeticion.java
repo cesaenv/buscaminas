@@ -1,5 +1,6 @@
 package Buscaminas;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -87,7 +88,7 @@ public class AtenderPeticion implements Runnable{
 		dout.writeBytes(buscaminas.stringTablero());
 		dout.flush();
 		
-		while(!buscaminas.ganado()) {
+		while(true) {
 			//RECIBIR LINEA
 			recibo = din.readLine();
 			
@@ -117,15 +118,31 @@ public class AtenderPeticion implements Runnable{
 					this.jugarInterfaz(din,dout);
 					break;
 				}
-				
-				//MANDAR TABLERO
-				dout.writeBytes((tamano+2) + lineaBlanco);
-				dout.writeBytes(buscaminas.stringTablero());
-				dout.flush();
+
+
+				if(buscaminas.ganado())
+				{
+					//SE HA GANADO
+					dout.writeBytes((-2) + lineaBlanco);
+					dout.writeBytes((tamano) + lineaBlanco);
+					dout.writeBytes(buscaminas.stringTablero());
+					dout.flush();
+
+
+
+					//NUEVO JUEGO
+					System.out.println("NUEVO JUEGO, GANASTE");
+					this.jugarInterfaz(din,dout);
+					break;
+				}else{
+					//MANDAR TABLERO
+					dout.writeBytes((tamano+2) + lineaBlanco);
+					dout.writeBytes(buscaminas.stringTablero());
+					dout.flush();
+				}
 			}
 			
 		}
-		System.out.println("GANADO");
 		
 	}
 	
