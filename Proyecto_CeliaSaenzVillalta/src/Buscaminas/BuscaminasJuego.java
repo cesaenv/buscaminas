@@ -127,7 +127,7 @@ public class BuscaminasJuego {
 	}
 	private boolean descolocarCasillaPosibleBomba(int fila, int columna) {
 		if(		tableroCliente.casillaColocada(fila, columna)) {
-			if(!tableroCliente.quitarBomba(fila,columna)) {
+			if(!tableroCliente.quitarFlag(fila,columna)) {
 				return false;
 			}
 			return true;

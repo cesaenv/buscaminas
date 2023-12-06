@@ -87,8 +87,8 @@ public class AtenderPeticion implements Runnable{
 		dout.writeBytes(buscaminas.stringTablero());
 		dout.flush();
 		
-		while(!salir) {
-			//RECIBIR CASILLA
+		while(!buscaminas.ganado()) {
+			//RECIBIR LINEA
 			recibo = din.readLine();
 			
 			modoArray = recibo.split(" ");
@@ -125,6 +125,7 @@ public class AtenderPeticion implements Runnable{
 			}
 			
 		}
+		System.out.println("GANADO");
 		
 	}
 	
@@ -216,7 +217,7 @@ public class AtenderPeticion implements Runnable{
 				break;
 			}
 		}
-		System.out.println();
+		System.out.println("GANASTE");
 		if(buscaminas.ganado()) {
 			//GANADO
 			dout.writeBytes((-2) + lineaBlanco);

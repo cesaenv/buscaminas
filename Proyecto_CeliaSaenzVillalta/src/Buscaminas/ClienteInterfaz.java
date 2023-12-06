@@ -26,7 +26,7 @@ public class ClienteInterfaz extends JFrame {
     
     private int numModo;
     private boolean nuevoJuego;
-    private int num = 10;
+    private int num = 15;
 	
 //    public static void main(String[] args) {
 //    	ClienteInterfaz nuevoCliente = new ClienteInterfaz(null);
