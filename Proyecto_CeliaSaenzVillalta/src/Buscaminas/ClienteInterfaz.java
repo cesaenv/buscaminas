@@ -52,7 +52,9 @@ public class ClienteInterfaz extends JFrame {
 
 		}catch(IOException e) {
 			e.printStackTrace();
-		}finally {
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
 			try {
 				if(din != null) {
 					din.close();
@@ -104,10 +106,11 @@ public class ClienteInterfaz extends JFrame {
 		for (int i = 0; i < num; i++) {
 			for (int j = 0; j < num; j++) {
 				botones[i][j] = new JButton();
-				botones[i][j].setBackground(Color.pink);
-				Font fuente = new Font("Calibri",20,50);
+				botones[i][j].setBackground(Color.lightGray);
+				Font fuente = new Font("Calibri",20,40);
 				botones[i][j].setFont(fuente);
 				botones[i][j].setForeground(Color.BLACK);
+				botones[i][j].setHorizontalAlignment(JButton.CENTER);
 				botones[i][j].addActionListener(new BotonCasilla(i,j));
 
 				panelJuego.add(botones[i][j]);
@@ -168,7 +171,7 @@ public class ClienteInterfaz extends JFrame {
 		Date act = new Date(ahora.getTime()-inicio.getTime());
 
 		// Formatear la hora como cadena
-		SimpleDateFormat formato = new SimpleDateFormat("mm:ss.SSS");
+		SimpleDateFormat formato = new SimpleDateFormat("mm:ss");
 		String horaFormateada = formato.format(act);
 
 		// Actualizar el texto del JLabel
@@ -184,10 +187,11 @@ public class ClienteInterfaz extends JFrame {
 		for (int f = 0; f < num; f++) {
 			for (int c = 0; c < num; c++) {
 				botones[f][c] = new JButton();
-				botones[f][c].setBackground(Color.pink);
-				Font fuente = new Font("Calibri",20,50);
+				botones[f][c].setBackground(Color.lightGray);
+				Font fuente = new Font("Calibri",20,40);
 				botones[f][c].setFont(fuente);
 				botones[f][c].setForeground(Color.BLACK);
+				botones[f][c].setAutoscrolls(true);
 				botones[f][c].addActionListener(new BotonCasilla(f,c));
 
 				panelJuego.add(botones[f][c]);
@@ -200,7 +204,7 @@ public class ClienteInterfaz extends JFrame {
 		labelNumBombas.setText("");
 		labelNumCasillasColocadas.setText("");
 	}
-    public void jugar() throws IOException{
+    public void jugar() throws IOException, InterruptedException {
 		setVisible(true);
 
     	String lineaBlanco = "\n";
@@ -213,9 +217,8 @@ public class ClienteInterfaz extends JFrame {
     	dout.writeBytes(num + lineaBlanco);
     	dout.flush();
 
-
-
     	while(!Thread.currentThread().isInterrupted()) {
+			Thread.sleep(1000);
 			actualizarReloj();
     	}
 
@@ -258,7 +261,7 @@ public class ClienteInterfaz extends JFrame {
 					botones[f][c].setText("");
 					botones[f][c].setIcon(null);
 				}else {
-					botones[f][c].setBackground(Color.pink);
+					botones[f][c].setBackground(Color.lightGray);
 					botones[f][c].setText(lineaSpliteada[c]);
 					botones[f][c].setText(lineaSpliteada[c]);
 					botones[f][c].setIcon(null);
@@ -276,6 +279,8 @@ public class ClienteInterfaz extends JFrame {
 				System.out.println(din.readLine());
 				mensaje = "HAS GANADO";
 			}
+
+
 			JOptionPane.showMessageDialog(null, mensaje);
 			nuevoJuego();
 		}
@@ -286,7 +291,7 @@ public class ClienteInterfaz extends JFrame {
     	for (int f = 0; f < num; f++) {
             for (int c = 0; c < num; c++) {
                 botones[f][c].setText("");
-				botones[f][c].setBackground(Color.PINK);
+				botones[f][c].setBackground(Color.lightGray);
 				linea = linea + c + " ";
             }
 			System.out.println(linea);
