@@ -145,9 +145,6 @@ public class ClienteTerminal {
 		boolean dev = true;
 		try {
 			int n = Integer.parseInt(s);
-			if (n<5){
-				System.out.println("No se acepta un tablero tan pequeño");
-			}
 		}catch(NumberFormatException e) {
 			dev = false;
 		}finally {

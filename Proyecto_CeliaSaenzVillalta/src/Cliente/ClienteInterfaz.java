@@ -1,5 +1,6 @@
 package Cliente;
 import javax.swing.*;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,19 +20,16 @@ import org.xml.sax.SAXException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ClienteInterfaz extends JFrame {
 	static ClienteInterfaz cliente;
@@ -199,14 +197,11 @@ public class ClienteInterfaz extends JFrame {
     }
 	private void actualizarReloj() {
 		if(!terminado) {
-			// Obtener la hora actual
 			Date act = new Date(new Date().getTime()-inicio.getTime());
-	
-			// Formatear la hora como cadena
+
 			SimpleDateFormat formato = new SimpleDateFormat("mm:ss");
 			String horaFormateada = formato.format(act);
-	
-			// Actualizar el texto del JLabel
+
 			labelReloj.setText(horaFormateada);
 		}
 	}
@@ -414,7 +409,8 @@ public class ClienteInterfaz extends JFrame {
 	
 	private void actualizarResultados(String nombreNivel, String result) {
 		try {
-			File file = new File("src\\Cliente\\resultados.xml");
+			File file = new File("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml");
+			System.out.println(file.getAbsolutePath());
 			if(!file.exists()) {
 				file.createNewFile();
 				FileOutputStream fout = new FileOutputStream(file);
@@ -469,7 +465,7 @@ public class ClienteInterfaz extends JFrame {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(documento);
-			StreamResult resul = new StreamResult("src\\\\Cliente\\\\resultados.xml");
+			StreamResult resul = new StreamResult("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml");
 			transformer.transform(source, resul);
 			
 		} catch (ParserConfigurationException e) {
@@ -500,7 +496,7 @@ public class ClienteInterfaz extends JFrame {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document documento = db.parse(new File("src\\Cliente\\resultados.xml"));
+			Document documento = db.parse(new File("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml"));
 			
 			//NODO RAÍZ PERSONA
 			Element persona = documento.getDocumentElement();
