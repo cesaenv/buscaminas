@@ -33,32 +33,41 @@ import java.util.Date;
 
 public class ClienteInterfaz extends JFrame {
 	static ClienteInterfaz cliente;
-//PANEL JUEGO
+	//PANEL JUEGO
 	private JPanel panelJuego;
 	private JButton[][] botones;
 
-//PANEL SUPERIORES
+	//PANEL SUPERIORES
 	private JPanel panelSuperior;
 	private JButton nuevoJuegoButton;
-    private JButton despejarCasillaButton;
-    private JButton colocarBanderasButton;
+	private JButton despejarCasillaButton;
+	private JButton colocarBanderasButton;
 
 	private Label labelNumBombas;
 	private Label labelNumCasillasColocadas;
 	private JLabel labelReloj;
 
-//FUNCIONALIDAD SOCKET
+	//FUNCIONALIDAD SOCKET
 	private static DataOutputStream dout;
-    private static DataInputStream din;
-    
-    private boolean terminado;
-    private Date inicio;
-    private int numModo;
-    private static int num;
-    
+	private static DataInputStream din;
+
+	private boolean terminado;
+	private Date inicio;
+	private int numModo;
+	private static int num;
+	private static String path;
+
 	public static void main(String[] args) {
 		Socket servidor = null;
-		
+
+		File file = new File("");
+		path = file.getAbsolutePath();
+		String [] split = path.split("\\\\");
+		if(!split[split.length-1].equalsIgnoreCase("Proyecto_CeliaSaenzVillalta")) {
+			path = path + "\\Proyecto_CeliaSaenzVillalta";
+		}
+		path = path + "\\src\\Cliente\\resultados.xml";
+
 		try {
 			servidor= new Socket(InetAddress.getLocalHost().getHostAddress(), 6666);	//IOException
 			din = new DataInputStream(servidor.getInputStream());	//IOException
@@ -68,7 +77,7 @@ public class ClienteInterfaz extends JFrame {
 			if(seleccionarNivel()){
 				cliente = new ClienteInterfaz();
 				cliente.jugar();	//IOException
-				
+
 			}
 
 		}catch(IOException e) {
@@ -87,12 +96,12 @@ public class ClienteInterfaz extends JFrame {
 				e.printStackTrace();
 			}
 		}
-    }
+	}
 	private void nuevoJuego(){
 		setVisible(false);
 		this.terminado = false;
 		this.labelReloj.setText("00:00");
-		
+
 		if(seleccionarNivel()){
 			if(num == 0) {
 				mostrarResultados();
@@ -101,34 +110,34 @@ public class ClienteInterfaz extends JFrame {
 				generarPanelJuego();
 				try {
 					setVisible(true);
-	
+
 					String lineaBlanco = "\n";
-	
+
 					//ENVIAR MODO
 					dout.writeBytes(4 + lineaBlanco);
 					dout.flush();
-	
+
 					//ENVIAR TAMAÑO TABLERO
 					dout.writeBytes(num + lineaBlanco);
 					dout.flush();
-	
+
 					this.inicio = new Date();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
 	}
-    
-    public ClienteInterfaz() {
-    	this.numModo = 1;
+
+	public ClienteInterfaz() {
+		this.numModo = 1;
 		this.inicio = new Date();
-		
-    	// Configurar la ventana principal
-        setTitle("Buscaminas");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+
+		// Configurar la ventana principal
+		setTitle("Buscaminas");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(new BorderLayout());
 
 		// Crear el panel de juego
 		panelJuego = new JPanel(new GridLayout(num, num));
@@ -187,14 +196,14 @@ public class ClienteInterfaz extends JFrame {
 		// Agregar panel de botones al norte (superior)
 		add(panelSuperior, BorderLayout.NORTH);
 
-        // Configurar la ventana
-        pack();
-        setLocationRelativeTo(null); // Centrar la ventana en la pantalla
-        
-     	// Configurar la ventana para que aparezca en pantalla completa
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+		// Configurar la ventana
+		pack();
+		setLocationRelativeTo(null); // Centrar la ventana en la pantalla
 
-    }
+		// Configurar la ventana para que aparezca en pantalla completa
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+	}
 	private void actualizarReloj() {
 		if(!terminado) {
 			Date act = new Date(new Date().getTime()-inicio.getTime());
@@ -232,55 +241,55 @@ public class ClienteInterfaz extends JFrame {
 		labelNumBombas.setText("");
 		labelNumCasillasColocadas.setText("");
 	}
-    public void jugar() throws IOException, InterruptedException {
+	public void jugar() throws IOException, InterruptedException {
 		setVisible(true);
 
-    	String lineaBlanco = "\n";
-    	
-    	//ENVIAR MODO DE JUEGO
-    	dout.writeBytes(("INTERFAZ" + lineaBlanco));
-    	dout.flush();
-    	
-    	//ENVIAR TAMAÑO TABLERO
-    	dout.writeBytes(num + lineaBlanco);
-    	dout.flush();
+		String lineaBlanco = "\n";
 
-    	while(!Thread.currentThread().isInterrupted()) {
+		//ENVIAR MODO DE JUEGO
+		dout.writeBytes(("INTERFAZ" + lineaBlanco));
+		dout.flush();
+
+		//ENVIAR TAMAÑO TABLERO
+		dout.writeBytes(num + lineaBlanco);
+		dout.flush();
+
+		while(!Thread.currentThread().isInterrupted()) {
 			Thread.sleep(1000);
 			actualizarReloj();
-    	}
+		}
 
-    }
-    
-    private void modificarCasillas() throws IOException {
-    	long tiempoFinal = 0;
-    	
-    	String linea;
-    	String [] lineaSpliteada;
-    	
-    	boolean perdido = false;
+	}
+
+	private void modificarCasillas() throws IOException {
+		long tiempoFinal = 0;
+
+		String linea;
+		String [] lineaSpliteada;
+
+		boolean perdido = false;
 		boolean ganado = false;
-    	
-    	int numLineas;
-    	
-    	linea = din.readLine();
-    	numLineas = Integer.parseInt(linea);
-    	if(numLineas == -1) { //HAS PERDIDO
-        	linea = din.readLine();
-    		numLineas = Integer.parseInt(linea);
-    		perdido = true;
-    	}
+
+		int numLineas;
+
+		linea = din.readLine();
+		numLineas = Integer.parseInt(linea);
+		if(numLineas == -1) { //HAS PERDIDO
+			linea = din.readLine();
+			numLineas = Integer.parseInt(linea);
+			perdido = true;
+		}
 		if(numLineas == -2) { //HAS GANADO
 			tiempoFinal = new Date().getTime() - this.inicio.getTime();
 			terminado = true;
-			
+
 			linea = din.readLine();
 			numLineas = Integer.parseInt(linea);
 			ganado = true;
 		}
-    	for(int f=0; f<num ; f++){
-    		linea = din.readLine();
-    		lineaSpliteada = linea.split(" ");
+		for(int f=0; f<num ; f++){
+			linea = din.readLine();
+			lineaSpliteada = linea.split(" ");
 			for(int c=0; c<lineaSpliteada.length; c++) {
 				if(lineaSpliteada[c].equals("P")){
 					botones[f][c].setText("");
@@ -300,7 +309,7 @@ public class ClienteInterfaz extends JFrame {
 					botones[f][c].setIcon(null);
 				}
 			}
-    	}
+		}
 		if(!ganado && !perdido){
 			labelNumBombas.setText(din.readLine());
 			labelNumCasillasColocadas.setText(din.readLine());
@@ -315,7 +324,7 @@ public class ClienteInterfaz extends JFrame {
 			if(ganado){
 				din.readLine();
 				din.readLine();
-				
+
 				String nivelSeleccionado = "";
 				if (num == 8) {
 					nivelSeleccionado = "n_Principiante";
@@ -326,29 +335,29 @@ public class ClienteInterfaz extends JFrame {
 				if (num == 20) {
 					nivelSeleccionado = "n_Experto";
 				}
-				
+
 				Date act = new Date(tiempoFinal);
 				SimpleDateFormat formato = new SimpleDateFormat("mm:ss.SSS");
 				String horaFormateada = formato.format(act);
-				
+
 				actualizarResultados(nivelSeleccionado,horaFormateada);
 			}
 			nuevoJuego();
 		}
-    }
-    
-    private void mostrarCasillas() {
+	}
+
+	private void mostrarCasillas() {
 		String linea = "";
-    	for (int f = 0; f < num; f++) {
-            for (int c = 0; c < num; c++) {
-                botones[f][c].setText("");
+		for (int f = 0; f < num; f++) {
+			for (int c = 0; c < num; c++) {
+				botones[f][c].setText("");
 				botones[f][c].setBackground(Color.lightGray);
 				linea = linea + c + " ";
-            }
+			}
 			System.out.println(linea);
 			linea = "";
-        }
-    }
+		}
+	}
 
 	private static boolean seleccionarNivel() {
 		int seleccion = -1;
@@ -365,7 +374,7 @@ public class ClienteInterfaz extends JFrame {
 					opciones,
 					opciones[3]
 			);
-			
+
 			if(seleccion >= 0) {
 				seleccionado = opciones[seleccion];
 			}
@@ -405,16 +414,15 @@ public class ClienteInterfaz extends JFrame {
 		}
 		return (seleccion >= 0);
 	}
-	
-	
+
+
 	private void actualizarResultados(String nombreNivel, String result) {
 		try {
-			File file = new File("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml");
-			System.out.println(file.getAbsolutePath());
+			File file = new File(path);
 			if(!file.exists()) {
 				file.createNewFile();
 				FileOutputStream fout = new FileOutputStream(file);
-				
+
 				String escribir = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n"
 						+ "<!DOCTYPE persona SYSTEM \"./resultados.dtd\">\r\n"
 						+ "<persona name=\"\">\r\n"
@@ -426,21 +434,21 @@ public class ClienteInterfaz extends JFrame {
 				fout.flush();
 				fout.close();
 			}
-			
+
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document documento = db.parse(file);
-			
+
 			//NODO RAÍZ PERSONA
 			Element persona = documento.getDocumentElement();
 			if(persona.getAttribute("name").isEmpty()) {
 				String name = JOptionPane.showInputDialog("Introducir tu nombre");
 				persona.setAttribute("name", name);
 			}
-			
+
 			//NODOS NIVELES
 			NodeList niveles = persona.getChildNodes();
-			
+
 			String texto;
 			Element nivel = null;
 			NodeList resultados = null;
@@ -451,7 +459,7 @@ public class ClienteInterfaz extends JFrame {
 					if(niveles.item(i).getNodeName().equalsIgnoreCase(nombreNivel)) {
 						resultados = niveles.item(i).getChildNodes();
 						nivel = (Element) niveles.item(i);
-						
+
 						resultado = documento.createElement("resultado");
 						resultado.setTextContent(result);
 						nivel.appendChild(resultado);
@@ -459,15 +467,15 @@ public class ClienteInterfaz extends JFrame {
 					}
 				}
 			}
-			
+
 			documento.insertBefore(documento.createProcessingInstruction("DOCTYPE", "persona SYSTEM 'src\\Cliente\\resultados.dtd'"), documento.getDocumentElement());
-			
+
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(documento);
-			StreamResult resul = new StreamResult("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml");
+			StreamResult resul = new StreamResult(path);
 			transformer.transform(source, resul);
-			
+
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -491,20 +499,20 @@ public class ClienteInterfaz extends JFrame {
 	private String longToString(long l) {
 		return l + "";
 	}
-	
+
 	private void mostrarResultados() {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document documento = db.parse(new File("Proyecto_CeliaSaenzVillalta\\src\\Cliente\\resultados.xml"));
-			
+			Document documento = db.parse(new File(path));
+
 			//NODO RAÍZ PERSONA
 			Element persona = documento.getDocumentElement();
 			System.out.println("Cliente: " + persona.getAttribute("name"));
-			
+
 			//NODOS NIVELES
 			NodeList niveles = persona.getChildNodes();
-			
+
 			Element nivel = null;
 			NodeList resultados = null;
 			Element resultado = null;
@@ -516,7 +524,7 @@ public class ClienteInterfaz extends JFrame {
 						resultados = niveles.item(i).getChildNodes();
 						for(int r=0, tamR=resultados.getLength(); r<tamR ;r++) {
 							if(	resultados.item(r).getNodeType() == Node.ELEMENT_NODE &&
-								resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
+									resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
 								System.out.println("	" + r + ": " + resultados.item(r).getTextContent() + "s");
 							}
 						}
@@ -528,7 +536,7 @@ public class ClienteInterfaz extends JFrame {
 						resultados = niveles.item(i).getChildNodes();
 						for(int r=0, tamR=resultados.getLength(); r<tamR ;r++) {
 							if(	resultados.item(r).getNodeType() == Node.ELEMENT_NODE &&
-								resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
+									resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
 								System.out.println("	" + r + ": " + resultados.item(r).getTextContent() + "s");
 							}
 						}
@@ -540,7 +548,7 @@ public class ClienteInterfaz extends JFrame {
 						resultados = niveles.item(i).getChildNodes();
 						for(int r=0, tamR=resultados.getLength(); r<tamR ;r++) {
 							if(	resultados.item(r).getNodeType() == Node.ELEMENT_NODE &&
-								resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
+									resultados.item(r).getNodeName().equalsIgnoreCase("resultado")) {
 								System.out.println("	" + r + ": " + resultados.item(r).getTextContent() + "s");
 							}
 						}
@@ -548,7 +556,7 @@ public class ClienteInterfaz extends JFrame {
 					}
 				}
 			}
-			
+
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -560,50 +568,50 @@ public class ClienteInterfaz extends JFrame {
 			e.printStackTrace();
 		}
 	}
-	
-    
-    class BotonCasilla implements ActionListener{
-    	private int fila, columna;
-    	
-    	public BotonCasilla(int fila, int columna) {
-    		this.fila = fila;
-    		this.columna = columna;
-    	}
-    	
-    	public void actionPerformed(ActionEvent e) {
-    		try {
+
+
+	class BotonCasilla implements ActionListener{
+		private int fila, columna;
+
+		public BotonCasilla(int fila, int columna) {
+			this.fila = fila;
+			this.columna = columna;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			try {
 				dout.writeBytes(numModo + " " + fila + "-" + columna + "\n");
 				modificarCasillas();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-    	}
-    }
-    
-    class BotonModo implements ActionListener{
-    	private int modo;
-    	
-    	public BotonModo(int modo) {
-    		this.modo = modo;
-    	}
-    	
-    	public void actionPerformed(ActionEvent e) {
-    		numModo = modo;
-    		
-    		if(modo == 1) {			//DESPEJAR CASILLAS
-    			despejarCasillaButton.setBackground(Color.magenta);
-    			
-    			nuevoJuegoButton.setBackground(Color.white);
-    			colocarBanderasButton.setBackground(Color.white);
-    		}
-    		else if(modo == 2) {	//COLOCAR BANDERAS
-    			colocarBanderasButton.setBackground(Color.magenta);
-    			
-    			nuevoJuegoButton.setBackground(Color.white);
-    			despejarCasillaButton.setBackground(Color.white);
-    		}
-    		else if(modo == 4) {	//NUEVO JUEGO
-    			nuevoJuegoButton.setBackground(Color.magenta);
+		}
+	}
+
+	class BotonModo implements ActionListener{
+		private int modo;
+
+		public BotonModo(int modo) {
+			this.modo = modo;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			numModo = modo;
+
+			if(modo == 1) {			//DESPEJAR CASILLAS
+				despejarCasillaButton.setBackground(Color.magenta);
+
+				nuevoJuegoButton.setBackground(Color.white);
+				colocarBanderasButton.setBackground(Color.white);
+			}
+			else if(modo == 2) {	//COLOCAR BANDERAS
+				colocarBanderasButton.setBackground(Color.magenta);
+
+				nuevoJuegoButton.setBackground(Color.white);
+				despejarCasillaButton.setBackground(Color.white);
+			}
+			else if(modo == 4) {	//NUEVO JUEGO
+				nuevoJuegoButton.setBackground(Color.magenta);
 
 				colocarBanderasButton.setBackground(Color.white);
 				despejarCasillaButton.setBackground(Color.white);
@@ -615,7 +623,7 @@ public class ClienteInterfaz extends JFrame {
 
 				nuevoJuegoButton.setBackground(Color.white);
 				colocarBanderasButton.setBackground(Color.white);
-    		}
-    	}
-    }
+			}
+		}
+	}
 }
