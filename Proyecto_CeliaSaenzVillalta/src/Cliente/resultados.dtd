@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT persona (n_Principiante,n_Intermedio,n_Experto)>
+<!ATTLIST persona name ID #REQUIRED>
+
+<!-- PRINCIPIANTE-->
+<!ELEMENT n_Principiante (resultado*)>
+<!-- INTERMEDIO-->
+<!ELEMENT n_Intermedio (resultado*)>
+<!-- EXPERTO-->
+<!ELEMENT n_Experto (resultado*)>
+
+<!ELEMENT resultado (#PCDATA)>

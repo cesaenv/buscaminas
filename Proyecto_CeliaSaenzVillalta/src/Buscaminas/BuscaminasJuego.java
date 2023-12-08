@@ -94,6 +94,10 @@ public class BuscaminasJuego {
 			if(tableroCliente.casillaColocada(fila,columna)) {
 				if(!tableroCliente.quitarFlag(fila,columna)) {
 					opcion(1,fila,columna);
+				}else {
+					if(esBomba(fila,columna)){
+						numBombasCorrectas--;
+					}
 				}
 			}else {
 				colocarCasillaPosibleBomba(fila,columna);
@@ -108,7 +112,7 @@ public class BuscaminasJuego {
 		return true;
 	}
 	public boolean ganado() {
-		return tableroCliente.ganado() && numBombasCorrectas == numBombas;
+		return tableroCliente.ganado() || numBombasCorrectas == numBombas;
 	}
 	public boolean esBomba(int fila, int columna) {
 		return (tablero[fila][columna] == -1);
